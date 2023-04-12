@@ -41,6 +41,10 @@ pub enum ExecuteMsg {
     },
     /// Handles update hook messages from the group contract
     MemberChangedHook(MemberChangedHookMsg),
+    UpdateItem {
+        key: String,
+        value: String,
+    },
 }
 
 // We can also add this as a cw3 extension
@@ -79,4 +83,7 @@ pub enum QueryMsg {
     /// Gets the current configuration.
     #[returns(crate::state::Config)]
     Config {},
+    /// Get items
+    #[returns(String)]
+    GetItem { key: String },
 }

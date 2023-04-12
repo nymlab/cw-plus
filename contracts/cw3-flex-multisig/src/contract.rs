@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
-    to_binary, Binary, BlockInfo, CosmosMsg, Deps, DepsMut, Empty, Env, MessageInfo, Order,
+    to_binary, Binary, BlockInfo, CosmosMsg, Deps, DepsMut, Empty, Env, Event, MessageInfo, Order,
     Response, StdResult,
 };
 
@@ -20,7 +20,7 @@ use cw_utils::{maybe_addr, Expiration, ThresholdResponse};
 
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
-use crate::state::{Config, CONFIG};
+use crate::state::{Config, CONFIG, ITEMS};
 
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:cw3-flex-multisig";
@@ -80,7 +80,29 @@ pub fn execute(
         ExecuteMsg::MemberChangedHook(MemberChangedHookMsg { diffs }) => {
             execute_membership_hook(deps, env, info, diffs)
         }
+        ExecuteMsg::UpdateItem { key, value } => execute_update_items(deps, env, info, key, value),
     }
+}
+
+pub fn execute_update_items(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    key: String,
+    value: String,
+) -> Result<Response<Empty>, ContractError> {
+    if info.sender != env.contract.address {
+        return Err(ContractError::Unauthorized {});
+    } else {
+        if ITEMS.has(deps.storage, key.clone()) {
+            ITEMS.remove(deps.storage, key);
+        } else {
+            ITEMS.save(deps.storage, key, &value)?;
+        };
+    }
+
+    let event = Event::new("vectis.cw3_flex_multisig.V1.UpdateItem");
+    Ok(Response::new().add_event(event))
 }
 
 pub fn execute_propose(
@@ -327,7 +349,12 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
             to_binary(&list_voters(deps, start_after, limit)?)
         }
         QueryMsg::Config {} => to_binary(&query_config(deps)?),
+        QueryMsg::GetItem { key } => to_binary(&query_item(deps, key)?),
     }
+}
+
+fn query_item(deps: Deps, key: String) -> StdResult<String> {
+    ITEMS.load(deps.storage, key)
 }
 
 fn query_threshold(deps: Deps) -> StdResult<ThresholdResponse> {

@@ -6,6 +6,7 @@ use cw_storage_plus::Item;
 use cw_utils::{Duration, Threshold};
 
 use crate::error::ContractError;
+pub use vectis_wallet::ITEMS;
 
 /// Defines who is able to execute proposals once passed
 #[cw_serde]
