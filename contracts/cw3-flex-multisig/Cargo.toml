@@ -29,8 +29,8 @@ cw-storage-plus = "1.0.1"
 cosmwasm-std = { version = "1.1.0" }
 schemars = "0.8.1"
 serde = { version = "1.0.103", default-features = false, features = ["derive"] }
-thiserror = { version = "1.0.23" }
-vectis-wallet = { git = "https://github.com/nymlab/vectis", rev = "e350ef0" }
+thiserror = { version = "1.0.50" }
+vectis-wallet = { git = "https://github.com/nymlab/vectis", rev = "ed93cc7" }
 
 [dev-dependencies]
 cw4-group = { path = "../cw4-group", version = "1.0.1" }
